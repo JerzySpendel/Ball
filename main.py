@@ -32,11 +32,13 @@ while not quit:
                 quit = True
             p.handle_event(e)
     dt = timer.tick()
+
     p.update(dt)
+    b.update(dt)
+
     p.draw()
     b.draw()
     s.draw()
     p.collision(b)
     sdl2.SDL_RenderPresent(w.ren)
-    print(dt)
     sdl2.SDL_Delay(2)

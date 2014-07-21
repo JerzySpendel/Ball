@@ -54,6 +54,12 @@ class Vector:
         self.y += vp[1]
         self.reduce_me()
 
+    def set_angle(self, ang):
+        l = self.length()
+        ang = math.radians(ang)
+        self.x = l*math.cos(ang)
+        self.y = l*math.sin(ang)
+
     def imitate_resistance(self, dt):
         l = self.length()
         if l > 0:
@@ -64,8 +70,14 @@ class Vector:
                 return
             self.reduce_me(n_p*STANDARD_LENGTH)
 
+    @staticmethod
+    def angle_between(v1, v2):
+        i = v1.x*v2.x+v1.y*v2.y
+        cos = i/(v1.length()*v2.length())
+        return math.acos(cos)
 class Ball:
-    v = [1,0]
+    direction = 0b0000 # UP RIGHT DOWN LEFT
+    v = Vector()
     speed = 100
     state = None
     tex = None
@@ -157,38 +169,6 @@ class Ball:
         r.h = self.h
         sdl2.SDL_RenderCopy(self.ren, self.tex, None, byref(r))
 
-class Player(Ball):
-    direction = 0b0000 # UP RIGHT DOWN LEFT
-    angle = 0
-    def __init__(self, win):
-        Ball.__init__(self, win)
-        self.win = win
-        self.v = Vector()
-    def handle_event(self, e):
-        sym = e.key.keysym.sym
-        if e.type == sdl2.SDL_KEYDOWN:
-
-            if sym == sdl2.SDLK_UP:
-                self.direction = self.direction | 0b1000
-            elif sym == sdl2.SDLK_RIGHT:
-                self.direction = self.direction | 0b0100
-            elif sym == sdl2.SDLK_DOWN:
-                self.direction = self.direction | 0b0010
-            elif sym == sdl2.SDLK_LEFT:
-                self.direction = self.direction | 0b0001
-
-        elif e.type == sdl2.SDL_KEYUP:
-            if sym == sdl2.SDLK_UP:
-                self.direction = self.direction & 0b0111
-            elif sym == sdl2.SDLK_RIGHT:
-                self.direction = self.direction & 0b1011
-            elif sym == sdl2.SDLK_DOWN:
-                self.direction = self.direction & 0b1101
-            elif sym == sdl2.SDLK_LEFT:
-                self.direction = self.direction & 0b1110
-        if self.direction == 0b1010 or self.direction == 0b0101:
-            self.direction = 0b0000
-
     def _update_vector(self, dt):
         d = self.direction
         if d == 0b1000:
@@ -214,7 +194,6 @@ class Player(Ball):
         self._update_vector(dt)
         self._x += self.v.x*dt*self.speed
         self._y -= self.v.y*dt*self.speed
-        print(self.v.x, self.v.y)
 
     def collision(self, b):
         r1 = self.rect
@@ -226,4 +205,37 @@ class Player(Ball):
             for xy in p1:
                 if xy in p2:
                     print('Kolizja')
-                    return
+                    break
+class Player(Ball):
+    angle = 0
+    def __init__(self, win):
+        Ball.__init__(self, win)
+        self.win = win
+        self.v = Vector()
+
+    def handle_event(self, e):
+        sym = e.key.keysym.sym
+        if e.type == sdl2.SDL_KEYDOWN:
+
+            if sym == sdl2.SDLK_UP:
+                self.direction = self.direction | 0b1000
+            elif sym == sdl2.SDLK_RIGHT:
+                self.direction = self.direction | 0b0100
+            elif sym == sdl2.SDLK_DOWN:
+                self.direction = self.direction | 0b0010
+            elif sym == sdl2.SDLK_LEFT:
+                self.direction = self.direction | 0b0001
+
+        elif e.type == sdl2.SDL_KEYUP:
+            if sym == sdl2.SDLK_UP:
+                self.direction = self.direction & 0b0111
+            elif sym == sdl2.SDLK_RIGHT:
+                self.direction = self.direction & 0b1011
+            elif sym == sdl2.SDLK_DOWN:
+                self.direction = self.direction & 0b1101
+            elif sym == sdl2.SDLK_LEFT:
+                self.direction = self.direction & 0b1110
+        if self.direction == 0b1010 or self.direction == 0b0101:
+            self.direction = 0b0000
+
+
