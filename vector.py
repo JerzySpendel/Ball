@@ -1,5 +1,6 @@
 import sdl2, sdl2.sdlgfx
 from ctypes import *
+import math
 STANDARD_LENGTH = 1
 class Vector:
     def __init__(self, x=None, y=None):
@@ -13,7 +14,7 @@ class Vector:
 
     def current_angle(self):
         v = Vector()
-        return math.degrees(math.acos((self.x*v.x+self.y*v.y)/(self.length()*v.length())))
+        return Vector.angle_between(self, v)
 
     def reduce_me(self, to=STANDARD_LENGTH):
         if self.length()>to:
@@ -68,11 +69,24 @@ class Vector:
                 return
             self.reduce_me(n_p*STANDARD_LENGTH)
 
+    def collide(self, v):
+        pass
+
     @staticmethod
-    def angle_between(v1, v2):
+    def angle_between(v1, v2=None):
+        if v2 == None:
+            v2 = Vector()
         i = v1.x*v2.x+v1.y*v2.y
-        cos = i/(v1.length()*v2.length())
-        return math.acos(cos)
+        ii = v1.length()*v2.length()
+        if ii != 0:
+            cos = i/ii
+            ang = math.acos(cos)
+            return ang
+        return None
+
+    def __repr__(self):
+        return '<class Vector=[{},{}]>'.format(self.x, self.y)
+
 class SpeedVector:
     w = 100
     h = 100
@@ -108,3 +122,12 @@ class SpeedVector:
         self.generateTexture()
         sdl2.SDL_RenderCopy(self.player.ren, self.tex, None, byref(self.rect))
         sdl2.SDL_RenderPresent(self.player.ren)
+
+class Collision:
+    @staticmethod
+    def collide(b1,b2):
+        v = b2.middle[0] - b1.middle[0], b2.middle[1] - b1.middle[1]
+        v = Vector(v[0],v[1])
+        b1.v.x *= -1
+        b1.v.y *= -1
+        print(Vector.angle_between(v))

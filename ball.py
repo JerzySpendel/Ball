@@ -1,7 +1,7 @@
 import sdl2, sdl2.sdlgfx
 from ctypes import *
 import math
-from vector import Vector
+from vector import Vector, Collision
 class Ball:
     direction = 0b0000 # UP RIGHT DOWN LEFT
     v = Vector()
@@ -33,6 +33,10 @@ class Ball:
     @property
     def x(self):
         return int(self._x)
+
+    @property
+    def middle(self):
+        return self.x+self.w//2, self.y+self.h//2
 
     @x.setter
     def x(self, v):
@@ -131,7 +135,7 @@ class Ball:
             p2 = b.pixels_in_rect(rr)
             for xy in p1:
                 if xy in p2:
-                    print('Kolizja')
+                    print(Collision.collide(self, b))
                     break
 class Player(Ball):
     angle = 0
@@ -164,5 +168,4 @@ class Player(Ball):
                 self.direction = self.direction & 0b1110
         if self.direction == 0b1010 or self.direction == 0b0101:
             self.direction = 0b0000
-
 
